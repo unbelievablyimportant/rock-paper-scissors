@@ -165,13 +165,17 @@
     var cycle = true;
     var hue = 359;
     var timeout;
+    var running = false;
 
     document.onkeypress = function(event) {
 
+      if (running) return;
+      running = true;
+      
+      clearTimeout(timeout);
+      
       document.querySelector('.user').style.display = 'inline-block';
       document.querySelector('.computer').style.display = 'inline-block';
-
-      clearTimeout(timeout);
 
       var user = answers.indexOf(event.key.toLowerCase());
 
