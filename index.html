@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ROCK, PAPER, SCISSSSSSOOOOORRRRRRSSSSS!!!!!</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet">
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Permanent Marker', cursive;
+      background: black;
+      color: white;
+    }
+
+    .outer {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+    }
+
+    .outer::after {
+      display: inline-block;
+      vertical-align: middle;
+      height: 100%;
+      content: "";
+    }
+
+    .inner {
+      display: inline-block;
+      vertical-align: bottom;
+    }
+
+    .inner span {
+      position: relative;
+      font-size: 40px;
+      padding: 0 5px;
+    }
+
+    .inner span::after {
+      font-size: 20px;
+      position: relative;
+      top: 100%;
+    }
+
+    #wins::after {
+      content: " Wins";
+    }
+
+    #ties::after {
+      content: " Ties";
+    }
+
+    #losses::after {
+      content: " Losses";
+    }
+
+    .user {
+      display: none;
+      text-align: center;
+      vertical-align: bottom;
+      position: absolute;
+      width: 40vw;
+      height: 40vw;
+      max-width: 250px;
+      max-height: 250px;
+      top: 30%;
+      left: 20px;
+    }
+
+    .computer {
+      display: none;
+      text-align: center;
+      vertical-align: bottom;
+      position: absolute;
+      width: 40vw;
+      height: 40vw;
+      max-width: 250px;
+      max-height: 250px;
+      top: 30%;
+      right: 20px;
+    }
+
+    .user img {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin-top: 70px;
+      /*This flips the images in any browser */
+      -moz-transform: scaleX(-1);
+      -o-transform: scaleX(-1);
+      -webkit-transform: scaleX(-1);
+      transform: scaleX(-1);
+      filter: FlipH;
+      -ms-filter: "FlipH";
+    }
+
+    .computer img {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin-top: 70px;
+    }
+
+    .bounce .user img, .bounce .computer img {
+      animation: bounce 0.5s 3;
+    }
+
+    @keyframes bounce {
+      0% { margin-top: 70px; }
+      50% { margin-top: 30px; }
+      100% { margin-top: 70px; }
+    }
+
+  </style>
+
+</head>
+<body class="bounce">
+
+  <div class="user">
+    <h1>Player</h1>
+    <img id="r-you" src="rock.png" />
+    <img id="s-you" src="scissors.png" />
+    <img id="p-you" src="paper.png" />
+  </div>
+
+  <div class="outer">
+    <div class="inner">
+      <span id="wins">0</span>
+      <span id="ties">0</span>
+      <span id="losses">0</span>
+    </div>
+  </div>
+
+  <div class="computer">
+    <h1>Me</h1>
+    <img class="throw" id="r-me" src="rock.png" />
+    <img class="throw" id="s-me" src="scissors.png" />
+    <img class="throw" id="p-me" src="paper.png" />
+  </div>
+
+
+  <script>
+
+    var answers = ['r', 'p', 's'];
+    var images = ['r-you', 'p-you', 's-you', 'r-me', 'p-me', 's-me'];
+    var wins = [1, 2, 0];
+    var counts = [0, 0, 0];
+    var upNext = null;
+    var cycle = true;
+    var hue = 359;
+    var timeout;
+
+    document.onkeypress = function(event) {
+
+      document.querySelector('.user').style.display = 'inline-block';
+      document.querySelector('.computer').style.display = 'inline-block';
+
+      clearTimeout(timeout);
+
+      var user = answers.indexOf(event.key.toLowerCase());
+
+      if (user > -1) {
+
+        //As soon as user choice is determined valid, computer picks
+        if (upNext !== null) {
+          var computer = upNext;
+        }else{
+          var computer = Math.floor(answers.length * Math.random());
+        }
+
+        for (var i = 0; i < images.length; i++) {
+          document.getElementById(images[i]).style.display = 'none';
+        }
+
+        document.getElementById('r-me').style.display = 'block';
+        document.getElementById('r-you').style.display = 'block';
+
+        cycle = true;
+        rotateHue();
+
+        timeout = setTimeout(function() {
+
+          document.getElementById('r-me').style.display = 'none';
+          document.getElementById('r-you').style.display = 'none';
+          document.getElementById(answers[computer] + '-me').style.display = 'block';
+          document.getElementById(answers[user] + '-you').style.display = 'block';
+
+          document.body.className = '';
+          cycle = false;
+
+          //Determine who wins (plus a little social engineering :P )
+          if (wins[user] === computer) {
+            upNext = wins[wins[computer]];
+            document.getElementById('losses').innerHTML = ++counts[2];
+          }else if (computer === user) {
+            upNext = null;
+            document.getElementById('ties').innerHTML = ++counts[1];
+          }else{
+            upNext = wins[user]; //loses[loses[loses[user]]];
+            document.getElementById('wins').innerHTML = ++counts[0];
+          }
+
+        }, 1400);
+
+        document.body.className = 'bounce';
+
+      }
+
+    }
+
+    alert('Hey! Press R, P, or S to play!');
+
+    //HUE ROTATION CODE BELOW!!
+
+    function rotateHue() {
+
+      hue -= 30;
+      hue = hue < 0 ? hue + 360 : hue;
+
+      document.body.style.backgroundColor = 'hsl(' + hue + ', 100%, 50%)';
+
+      if (cycle) {
+        window.requestAnimationFrame(rotateHue);
+      }else{
+        document.body.style.backgroundColor = 'black';
+      }
+
+    }
+
+  </script>
+
+</body>
